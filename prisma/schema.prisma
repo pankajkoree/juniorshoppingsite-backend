@@ -5,11 +5,25 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
+}
+
+model Org {
+  id    String   @id @default(auto()) @map("_id") @db.ObjectId
+  org   String
+  doe   DateTime @default(now())
+  users user[]
+}
+
+model user {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  email   String @unique
+  orgId   String @db.ObjectId
+  orgName Org    @relation(fields: [orgId], references: [id])
 }
