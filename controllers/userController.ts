@@ -47,7 +47,17 @@ export const registerUser = async (req: Request, res: Response) => {
 
 export const loginUser = async (req: Request, res: Response) => {
     try {
-        const { }
+        const { email, password } = req.body;
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email
+            },
+            select: {
+                username: true,
+                email: true,
+            }
+        })
+        return res.status(200).json({ message: "login successful", data: user })
     } catch (error) {
         return res.status(500).json({ message: "server error", error: error })
     }
