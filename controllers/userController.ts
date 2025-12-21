@@ -2,8 +2,8 @@ import prisma from "../DB/db.config";
 import { Request, Response } from "express";
 import { registerSchema } from "../schemas/register.schema"
 import bcrypt from "bcryptjs"
-export const registerUser = async (req: Request, res: Response) => {
 
+export const registerUser = async (req: Request, res: Response) => {
     try {
         const { username, email, password } = req.body
 
@@ -20,7 +20,7 @@ export const registerUser = async (req: Request, res: Response) => {
         // <------- hashing the password ------->
         const hashedPassword = await bcrypt.hash(password, 12)
 
-        return await prisma.user.create({
+        const userData = await prisma.user.create({
             data: {
                 username,
                 email,
@@ -28,11 +28,27 @@ export const registerUser = async (req: Request, res: Response) => {
             }
         })
 
+        return res.status(200).json({
+            success: true,
+            message: "registration successful",
+            user: {
+                id: userData.id,
+                username: userData.username,
+                email: userData.email
+            }
+        })
+
     } catch (error) {
         return res.status(500)
             .json({ message: "server error", error: error })
     }
+}
 
 
-
+export const loginUser = async (req: Request, res: Response) => {
+    try {
+        const { }
+    } catch (error) {
+        return res.status(500).json({ message: "server error", error: error })
+    }
 }
