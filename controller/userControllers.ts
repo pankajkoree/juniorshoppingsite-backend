@@ -1,4 +1,4 @@
-import prisma from "../DB/db.config";
+import prisma from "../DB/db.config"
 import { Request, Response } from "express";
 import { registerSchema } from "../schemas/register.schema"
 import bcrypt from "bcryptjs"
