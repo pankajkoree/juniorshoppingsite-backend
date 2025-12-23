@@ -28,6 +28,8 @@ export const registerUser = async (req: Request, res: Response) => {
             }
         })
 
+        // <------- checking if user exits ------->
+
         return res.status(200).json({
             success: true,
             message: "registration successful",
