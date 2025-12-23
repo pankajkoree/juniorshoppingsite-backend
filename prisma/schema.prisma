@@ -13,4 +13,17 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+  tokens    Token[]
+}
+
+model Token {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  token     String
+  createdAt DateTime @default(now())
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([createdAt], map: "TokenCreatedAtIndex")
 }

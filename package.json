@@ -6,14 +6,14 @@
   "author": "",
   "main": "dist/app.js",
   "scripts": {
-  "build": "tsc",
-  "start": "node dist/app.js",
-  "dev": "nodemon --watch app.ts --exec ts-node app.ts"
-},
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "nodemon --watch app.ts --exec ts-node app.ts"
+  },
   "devDependencies": {
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.3",
-    "@types/validator": "^13.15.10",
     "prisma": "6.19"
   },
   "dependencies": {
@@ -22,9 +22,9 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "ioredis": "^5.8.2",
+    "jsonwebtoken": "^9.0.3",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
-    "validator": "^13.15.26",
     "zod": "^4.2.1"
   }
 }
