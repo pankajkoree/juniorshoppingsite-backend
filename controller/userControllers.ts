@@ -1,8 +1,11 @@
 import bcrypt from "bcryptjs"
 import { Request, Response } from "express";
+import dotenv from "dotenv"
 import prisma from "../DB/db.config"
 import { registerSchema } from "../schemas/register.schema"
 import { generateToken } from "../utils/generateToken";
+
+dotenv.config()
 
 // <------- register ------->
 export const registerUser = async (req: Request, res: Response) => {
@@ -121,4 +124,14 @@ export const loginUser = async (req: Request, res: Response) => {
     } catch (error) {
         return res.status(500).json({ message: "server error", error: error })
     }
+}
+
+export const logout = async (req: Request, res: Response) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    })
+
+    return res.status(200).json({ message: "logged out successfully" })
 }
