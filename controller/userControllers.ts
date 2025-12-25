@@ -126,12 +126,18 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 }
 
+// <------- logout------->
 export const logout = async (req: Request, res: Response) => {
-    res.clearCookie("token", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
-    })
-
-    return res.status(200).json({ message: "logged out successfully" })
+    try {
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+        })
+        // <------- response for successful logout ------->
+        return res.status(200).json({ message: "logged out successfully" })
+    } catch (error) {
+        // <------- response for server error ------->
+        return res.status(500).json({ message: "server error", error: error })
+    }
 }
