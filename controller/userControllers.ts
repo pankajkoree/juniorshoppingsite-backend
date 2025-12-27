@@ -3,7 +3,10 @@ import { Request, Response } from "express";
 import dotenv from "dotenv"
 import prisma from "../DB/db.config"
 import { registerSchema } from "../schemas/register.schema"
+import { loginSchema } from "../schemas/login.schema";
+import { resetPasswordSchema } from "../schemas/resetPassword.schema";
 import { generateToken } from "../utils/generateToken";
+import { email, success } from "zod";
 
 dotenv.config()
 
@@ -64,6 +67,12 @@ export const registerUser = async (req: Request, res: Response) => {
 export const loginUser = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
+
+        // <------- validation ------->
+        const validation = loginSchema.safeParse({ email, password })
+        if (!validation.success) {
+            return res.status(400).json({ success: false, errors: validation.error.format() })
+        }
 
         // <------- fetching user if exists ------->
         const user = await prisma.user.findUnique({
@@ -144,5 +153,58 @@ export const logout = async (req: Request, res: Response) => {
 
 // <------- reset password------->
 export const resetPassword = async (req: Request, res: Response) => {
+    try {
+        const { identifier, newPassword } = req.body;
 
+        // <------- validation ------->
+        const validation = resetPasswordSchema.safeParse({ newPassword })
+        if (!validation.success) {
+            return res.status(400).json({ success: false, errors: validation.error.format() })
+        }
+
+        // <------ checking required fields ------>
+        if (!identifier || !newPassword) {
+            return res.status(400).json({ message: "both fields are required" })
+        }
+
+        // <------- finding if user exists, so can proceed with reseting password ------->
+        let user;
+        if (identifier.includes("@")) {
+            user = await prisma.user.findUnique({
+                where: { email: identifier.toLowerCase() },
+                select: {
+                    id: true, username: true, email: true, password: true,
+                }
+            })
+        } else {
+            user = await prisma.user.findUnique({
+                where: { username: identifier.toLowerCase() },
+                select: {
+                    id: true, username: true, email: true, password: true,
+                }
+            })
+        }
+
+        if (!user) {
+            return res.status(400).json({ message: "user not found" })
+        }
+        // <------- hashing and updating the password -------> 
+        const hashedPassword = await bcrypt.hash(newPassword, 12)
+        user.password = hashedPassword
+
+        // <------- updating the user ------->
+        const userData = await prisma.user.update({
+            where: { id: user.id },
+            data: { password: hashedPassword }
+        })
+
+        // <------- response for success ------->
+        return res.status(200).json({
+            success: true,
+            message: "password reset successful. you can now login with new password"
+        })
+    } catch (error) {
+        // <------- response for server error ------->
+        return res.status(500).json({ message: "server error", error: error })
+    }
 }
