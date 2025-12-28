@@ -6,7 +6,6 @@ import { registerSchema } from "../schemas/register.schema"
 import { loginSchema } from "../schemas/login.schema";
 import { resetPasswordSchema } from "../schemas/resetPassword.schema";
 import { generateToken } from "../utils/generateToken";
-import { email, success } from "zod";
 
 dotenv.config()
 
