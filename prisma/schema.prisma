@@ -27,3 +27,7 @@ model Token {
 
   @@index([createdAt], map: "TokenCreatedAtIndex")
 }
+
+model Products{
+  
+}
