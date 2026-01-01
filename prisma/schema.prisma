@@ -30,47 +30,47 @@ model Token {
 
 model Product {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
-  title       String
-  description String
-  category    String
+  title       String?
+  description String?
+  category    String?
 
-  price             Float
-  discoutPercentage Float
-  rating            Float
-  stock             Int
+  price             Float?
+  discountPercentage Float?
+  rating            Float?
+  stock             Int?
 
-  brand  String
-  sku    String @unique
-  weight Int
+  brand  String?
+  sku    String?
+  weight Int?
 
   tags      String[]
   images    String[]
-  thumbnail String
+  thumbnail String?
 
-  warrantyInformation  String
-  shippingInformation  String
-  returnPolicy         String
-  availabilityStatus   String
-  minimumOrderQuantity Int
+  warrantyInformation  String?
+  shippingInformation  String?
+  returnPolicy         String?
+  availabilityStatus   String?
+  minimumOrderQuantity Int?
 
-  barcode String
-  qrCode  String
+  barcode String?
+  qrCode  String?
 
   dimensions Dimensions?
   meta       Meta?
 
   reviews Review[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime?
+  updatedAt DateTime?
 }
 
 model Dimensions {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  width  Float
-  height Float
-  depth  Float
+  width  Float?
+  height Float?
+  depth  Float?
 
   productId String  @unique @db.ObjectId
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -79,8 +79,8 @@ model Dimensions {
 model Meta {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  createdAt DateTime
-  updatedAt DateTime
+  createdAt DateTime?
+  updatedAt DateTime?
 
   productId String  @unique @db.ObjectId
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -89,9 +89,9 @@ model Meta {
 model Review {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  rating   Float
-  comment  String
-  reviewer String
+  rating   Float?
+  comment  String?
+  reviewer String?
 
   productId String   @db.ObjectId
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
