@@ -14,9 +14,6 @@ app.use(express.urlencoded({ extended: false }))
 import routes from "./routes/index"
 app.use(routes)
 
-import productIndex from "./routes/productIndex"
-app.use(productIndex)
-
 app.get("/", (req: Request, res: Response) => {
     return res.send("its working fine...")
 })
