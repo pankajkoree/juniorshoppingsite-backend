@@ -61,12 +61,12 @@ export const getProductsByName = async (req: Request, res: Response) => {
         // searching product with matching product name
         const fetchedProducts = await prisma.product.findMany({
             where: {
-                OR: productInWords.map((productNameInWord) => {
+                OR: productInWords.map((productNameInWord) => ({
                     title: {
                         contains: productNameInWord,
-                            mode: "insensitive"
+                        mode: "insensitive"
                     }
-                })
+                }))
 
             },
             select: {
