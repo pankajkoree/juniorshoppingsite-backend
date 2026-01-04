@@ -1,4 +1,5 @@
 import { Request, Response } from "express"
+import { ObjectId } from "bson"
 import prisma from "../DB/db.config"
 
 // <------- get all products ------->
@@ -47,7 +48,7 @@ export const getProductsByCategory = async (req: Request, res: Response) => {
     }
 }
 
-// <------- search specific products ------->
+// <------- products by name in more than one words ------->
 export const getProductsByName = async (req: Request, res: Response) => {
     try {
         const productName = (req.params.productName as string).trim()
@@ -88,6 +89,41 @@ export const getProductsByName = async (req: Request, res: Response) => {
 
         // <------- response for success ------->
         return res.status(201).json({ success: true, total: fetchedProducts.length, data: fetchedProducts })
+    } catch (error) {
+        // <------- response for server error ------->
+        return res.status(500).json({ message: "server error", error: error })
+    }
+}
+
+// <------- products by id ------->
+export const getProductsById = async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+
+        console.log(req.params)
+        // <------- checking if id is valid ------->
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, message: "Invalid product id" })
+        }
+
+        // <------- prisma query for id ------->
+        const products = await prisma.product.findUnique({
+            where: {
+                id
+            },
+            select: {
+                title: true,
+                description: true,
+                price: true,
+                discountPercentage: true,
+                rating: true,
+                brand: true,
+                thumbnail: true,
+            }
+        })
+
+        // <-------- response for success ------->
+        return res.status(201).json({ success: true, data: products })
     } catch (error) {
         // <------- response for server error ------->
         return res.status(500).json({ message: "server error", error: error })
