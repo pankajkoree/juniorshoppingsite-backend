@@ -18,5 +18,6 @@ app.get("/", (req: Request, res: Response) => {
     return res.send("its working fine...")
 })
 
-
-app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`))
+const server = app.listen(PORT, () => {
+    console.log(`Server running on PORT ${PORT}`)
+})

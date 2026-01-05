@@ -100,7 +100,8 @@ export const getProductsById = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
 
-        console.log(req.params)
+        console.log("Incoming ID:", id)
+
         // <------- checking if id is valid ------->
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ success: false, message: "Invalid product id" })
