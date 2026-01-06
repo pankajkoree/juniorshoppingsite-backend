@@ -100,8 +100,6 @@ export const getProductsById = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
 
-        console.log("Incoming ID:", id)
-
         // <------- checking if id is valid ------->
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ success: false, message: "Invalid product id" })
@@ -120,11 +118,30 @@ export const getProductsById = async (req: Request, res: Response) => {
                 rating: true,
                 brand: true,
                 thumbnail: true,
+                category: true,
+                stock: true,
+                tags: true,
+                sku: true,
+                weight: true,
+                dimensions: true,
+                warrantyInformation: true,
+                shippingInformation: true,
+                availabilityStatus: true,
+                reviews: true,
+                returnPolicy: true,
+                minimumOrderQuantity: true,
+                meta: true,
+                images: true
             }
         })
 
+        // <------- response if not found ------->
+        if (!products) {
+            return res.status(404).json({ success: false, message: "product not found" })
+        }
+
         // <-------- response for success ------->
-        return res.status(201).json({ success: true, data: products })
+        return res.status(200).json({ success: true, data: products })
     } catch (error) {
         // <------- response for server error ------->
         return res.status(500).json({ message: "server error", error: error })

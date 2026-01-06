@@ -10,7 +10,7 @@ const router = Router()
 
 router.get("/", getProducts)
 router.post("/category/:category", getProductsByCategory)
-router.post("/:productName", getProductsByName)
-router.post("/:id", getProductsById)
+router.post("/product-name/:productName", getProductsByName)
+router.post("/product-id/:id", getProductsById)
 
 export default router

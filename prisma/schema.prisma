@@ -29,15 +29,16 @@ model Token {
 }
 
 model Product {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+
   title       String?
   description String?
   category    String?
 
-  price             Float?
+  price              Float?
   discountPercentage Float?
-  rating            Float?
-  stock             Int?
+  rating             Float?
+  stock              Int?
 
   brand  String?
   sku    String?
@@ -53,47 +54,32 @@ model Product {
   availabilityStatus   String?
   minimumOrderQuantity Int?
 
-  barcode String?
-  qrCode  String?
-
   dimensions Dimensions?
   meta       Meta?
-
-  reviews Review[]
+  reviews    Review[]
 
   createdAt DateTime?
   updatedAt DateTime?
 }
 
-model Dimensions {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
+type Dimensions {
   width  Float?
   height Float?
   depth  Float?
-
-  productId String  @unique @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
-model Meta {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  createdAt DateTime?
-  updatedAt DateTime?
-
-  productId String  @unique @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+type Meta {
+  createdAt String?
+  updatedAt String?
+  barcode   String?
+  qrCode    String?
 }
 
-model Review {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  rating   Float?
-  comment  String?
-  reviewer String?
-
-  productId String   @db.ObjectId
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+type Review {
+  rating         Float?
+  comment        String?
+  date           String?
+  reviewerName   String?
+  reviewerEmail  String?
 }
+

@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/app.js",
-    "dev": "nodemon --watch . --ext ts,json --exec ts-node app.ts"
+    "dev": "nodemon --watch . --ignore dist --ext ts,json --exec ts-node app.ts"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
