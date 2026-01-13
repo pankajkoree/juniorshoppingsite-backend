@@ -11,6 +11,7 @@
     "dev": "nodemon --watch . --ignore dist --ext ts,json --exec ts-node app.ts"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.3",
@@ -18,8 +19,11 @@
   },
   "dependencies": {
     "@prisma/client": "6.19",
+    "@types/cors": "^2.8.19",
     "bcryptjs": "^3.0.3",
     "bson": "^7.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "ioredis": "^5.8.2",
