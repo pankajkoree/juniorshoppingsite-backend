@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 4000
 app.use(cors({
     origin: [
         "http://localhost:3000",
-        "https://juniorshoppingsite-backend-1.onrender.com"
+        "https://juniorshoppingsite.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -20,18 +20,18 @@ app.use(cors({
 
 }))
 
-app.use(express.json())
-app.use(cookieParser())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // Routes
-import routes from "./routes/index"
-app.use(routes)
+import routes from "./routes/index";
+app.use(routes);
 
-app.get("/", (req: Request, res: Response) => {
-    return res.send("its working fine...")
-})
+app.get("/", (_req: Request, res: Response) => {
+    res.send("its working fine...");
+});
 
-const server = app.listen(PORT, () => {
-    console.log(`Server running on PORT ${PORT}`)
-})
+app.listen(PORT, () => {
+    console.log(`Server running on PORT ${PORT}`);
+});
