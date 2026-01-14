@@ -6,8 +6,101 @@ import { registerSchema } from "../schemas/register.schema"
 import { loginSchema } from "../schemas/login.schema";
 import { resetPasswordSchema } from "../schemas/resetPassword.schema";
 import { generateToken } from "../utils/generateToken";
+import jwt from "jsonwebtoken"
 
 dotenv.config()
+
+// <------- profile ------->
+export const getProfile = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).userId
+        const user = await prisma.user.findUnique({
+            where: { id: userId }, select: {
+                id: true,
+                username: true,
+                email: true,
+            }
+        })
+
+        // <------- response if user not found ------->
+        if (!user) {
+            return res.status(404).json({ message: "user not found" })
+        }
+
+        // <------- response for success ------->
+        return res.status(200).json({
+            success: true, message: "user found", user: {
+                id: user.id,
+                username: user.username,
+                email: user.email
+            }
+        })
+    } catch (error) {
+        // <------- response for server error ------->
+        return res.status(500).json({ message: "server error", error: error })
+    }
+}
+
+// <------- current user ------->
+export const getCurrentUser = async (req: Request, res: Response) => {
+    try {
+        const token = req.cookies?.token
+
+        // <------- response if token missing ------->
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized - missing token",
+            });
+        }
+
+        const validToken = await prisma.token.findUnique({
+            where: { token },
+        });
+
+        // <------- response for invalid token ------->
+        if (!validToken) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid or expired token",
+            });
+        }
+
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET!
+        ) as { id: string };
+
+        const user = await prisma.user.findUnique({
+            where: { id: decoded.id },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+            },
+        });
+
+        // <------- response if user not found ------->
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        (req as any).userId = user.id;
+
+        // <------- response for success -------> 
+        return res.status(200).json({
+            success: true,
+            message: "User found",
+            user,
+        });
+    } catch (error) {
+        // <------- response for server error ------->
+        return res.status(500).json({ message: "server error", error: error })
+    }
+}
 
 // <------- register ------->
 export const registerUser = async (req: Request, res: Response) => {
