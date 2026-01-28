@@ -1,14 +1,59 @@
 import { Request, Response } from "express"
 import { ObjectId } from "bson"
 import prisma from "../DB/db.config"
+import redis from "../redis/redis.client";
 
 // <------- get all products ------->
 export const getProducts = async (req: Request, res: Response) => {
     try {
-        const products = await prisma.product.findMany()
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const cacheKey = `products:page=${page}:limit:${limit}`
+
+        // checking redis first
+        const cachedData = await redis.get(cacheKey)
+
+        if (cachedData) {
+            return res.status(200).json({
+                success: true,
+                source: "redis",
+                ...JSON.parse(cachedData)
+            })
+        }
+
+        // if not data from db
+
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                skip,
+                take: limit,
+
+            }),
+            prisma.product.count()
+        ])
+
+        const responseData = {
+            products,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        }
+
+        // store in redis
+        await redis.set(
+            cacheKey,
+            JSON.stringify(responseData),
+            "EX",
+            60
+        )
 
         // <------- response for successfull ------->
-        return res.status(200).json({ success: true, message: "successfully fetched all products", data: products })
+        return res.status(200).json({ success: true, message: "successfully fetched all products", source: "db", ...responseData })
     } catch (error) {
         // <------- response for server error ------->
         return res.status(500).json({ message: "server error", error: error })
