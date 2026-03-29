@@ -1,45 +1,25 @@
-# ---------- Build stage ----------
-FROM node:20 AS builder
+# Use the official Node.js image
+FROM node:20-alpine
 
-WORKDIR /app
+# Set working directory
+WORKDIR /usr/src/app
 
-# Copy only dependency files first (better caching)
+# Copy package files
 COPY package*.json ./
 COPY prisma ./prisma/
 
+# Install all dependencies (including devDeps for build)
 RUN npm install
 
-# Copy source code
+# Copy the rest of your code
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma Client and Build TypeScript
 RUN npx prisma generate
-
-# Build TS → JS
 RUN npm run build
 
-
-# ---------- Production stage ----------
-FROM node:20-slim
-
-WORKDIR /app
-
-# Prisma needs OpenSSL
-RUN apt-get update \
-    && apt-get install -y openssl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy only what is needed
-COPY package*.json ./
-RUN npm install --omit=dev
-
-# Copy compiled app + prisma
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-
-ENV NODE_ENV=production
-
+# Expose the port (Back4app usually uses 3000 by default)
 EXPOSE 3000
 
-CMD ["node", "dist/app.js"]
+# Start the application
+CMD ["npm", "start"]
