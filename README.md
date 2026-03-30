@@ -341,6 +341,3 @@ JWT_SECRET=your-secure-jwt-secret
 3. Make changes and test
 4. Submit a pull request
 
-## License
-
-ISC
