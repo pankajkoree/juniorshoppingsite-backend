@@ -7,6 +7,7 @@ import { loginSchema } from "../schemas/login.schema";
 import { resetPasswordSchema } from "../schemas/resetPassword.schema";
 import { generateToken } from "../utils/generateToken";
 import jwt from "jsonwebtoken"
+import logger from "../utils/logger";
 
 dotenv.config()
 
@@ -24,20 +25,20 @@ export const getProfile = async (req: Request, res: Response) => {
 
         // <------- response if user not found ------->
         if (!user) {
-            return res.status(404).json({ message: "user not found" })
+            return res.status(404).json({ success: false, message: "User not found" })
         }
 
         // <------- response for success ------->
         return res.status(200).json({
-            success: true, message: "user found", user: {
+            success: true, message: "User found", user: {
                 id: user.id,
                 username: user.username,
                 email: user.email
             }
         })
     } catch (error) {
-        // <------- response for server error ------->
-        return res.status(500).json({ message: "server error", error: error })
+        logger.error('Error in getProfile:', error);
+        return res.status(500).json({ success: false, message: "Internal server error" })
     }
 }
 
@@ -98,7 +99,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         });
     } catch (error) {
         // <------- response for server error ------->
-        return res.status(500).json({ message: "server error", error: error })
+        return res.status(500).json({ success: false, message: "Internal server error" })
     }
 }
 
@@ -108,10 +109,6 @@ export const registerUser = async (req: Request, res: Response) => {
         const { username, email, password } = req.body
 
         // <------- Validation ------->
-        if (!username || !email || !password) {
-            return res.status(400)
-                .json({ message: "All fields are required" })
-        }
         const validation = registerSchema.safeParse({ username, email, password })
         if (!validation.success) {
             return res.status(400).json({ success: false, errors: validation.error.format() })
@@ -122,7 +119,7 @@ export const registerUser = async (req: Request, res: Response) => {
             where: { email: email }
         }) !== null;
         if (existingUser) {
-            return res.status(400).json({ message: "email acount already exists, please login" })
+            return res.status(400).json({ success: false, message: "Email account already exists, please login" })
         }
 
         // <------- hashing the password ------->
@@ -140,7 +137,7 @@ export const registerUser = async (req: Request, res: Response) => {
         // <------- response for 200 ------->
         return res.status(200).json({
             success: true,
-            message: "registration successful",
+            message: "Registration successful",
             user: {
                 id: userData.id,
                 username: userData.username,
@@ -150,8 +147,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     } catch (error) {
         // <------- response for server error ------->
-        return res.status(500)
-            .json({ message: "server error", error: error })
+        return res.status(500).json({ success: false, message: "Internal server error" })
     }
 }
 
@@ -179,20 +175,20 @@ export const loginUser = async (req: Request, res: Response) => {
             }
         })
 
-        // <-------- reponse if user not found ------->
+        // <-------- response if user not found ------->
         if (!user) {
-            return res.status(400).json({ message: "user not found, please register" })
+            return res.status(400).json({ success: false, message: "User not found, please register" })
         }
 
         // <------- response for password if not found ------->
         if (!user.password) {
-            return res.status(400).json({ message: "user password not found" })
+            return res.status(400).json({ success: false, message: "User password not found" })
         }
 
         // <------- comparing password ------->
         const isValidPassword = await bcrypt.compare(password, user.password)
         if (!isValidPassword) {
-            return res.status(400).json({ message: "invalid password" })
+            return res.status(400).json({ success: false, message: "Invalid password" })
         }
 
         // <------- token for login ------->
@@ -214,7 +210,8 @@ export const loginUser = async (req: Request, res: Response) => {
 
         // <------- response if success ------->
         return res.status(200).json({
-            message: "login successful",
+            success: true,
+            message: "Login successful",
             generatedToken,
             data: {
                 id: user.id,
@@ -223,23 +220,31 @@ export const loginUser = async (req: Request, res: Response) => {
             }
         })
     } catch (error) {
-        return res.status(500).json({ message: "server error", error: error })
+        return res.status(500).json({ success: false, message: "Internal server error" })
     }
 }
 
 // <------- logout------->
 export const logout = async (req: Request, res: Response) => {
     try {
+        const token = req.cookies?.token;
+        if (token) {
+            // Delete the token from database
+            await prisma.token.deleteMany({
+                where: { token }
+            });
+        }
+
         res.clearCookie("token", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
         })
         // <------- response for successful logout ------->
-        return res.status(200).json({ message: "logged out successfully" })
+        return res.status(200).json({ success: true, message: "Logged out successfully" })
     } catch (error) {
         // <------- response for server error ------->
-        return res.status(500).json({ message: "server error", error: error })
+        return res.status(500).json({ success: false, message: "Internal server error" })
     }
 }
 
@@ -256,7 +261,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
         // <------ checking required fields ------>
         if (!identifier || !newPassword) {
-            return res.status(400).json({ message: "both fields are required" })
+            return res.status(400).json({ success: false, message: "Both fields are required" })
         }
 
         // <------- finding if user exists, so can proceed with reseting password ------->
@@ -278,11 +283,10 @@ export const resetPassword = async (req: Request, res: Response) => {
         }
 
         if (!user) {
-            return res.status(400).json({ message: "user not found" })
+            return res.status(400).json({ success: false, message: "User not found" })
         }
-        // <------- hashing and updating the password -------> 
+        // <------- hashing the password -------> 
         const hashedPassword = await bcrypt.hash(newPassword, 12)
-        user.password = hashedPassword
 
         // <------- updating the user ------->
         const userData = await prisma.user.update({
@@ -290,13 +294,18 @@ export const resetPassword = async (req: Request, res: Response) => {
             data: { password: hashedPassword }
         })
 
+        // Invalidate all existing tokens for security
+        await prisma.token.deleteMany({
+            where: { userId: user.id }
+        });
+
         // <------- response for success ------->
         return res.status(200).json({
             success: true,
-            message: "password reset successful. you can now login with new password"
+            message: "Password reset successful. You can now login with new password"
         })
     } catch (error) {
         // <------- response for server error ------->
-        return res.status(500).json({ message: "server error", error: error })
+        return res.status(500).json({ success: false, message: "Internal server error" })
     }
 }

@@ -9,8 +9,8 @@ import {
 const router = Router()
 
 router.get("/", getProducts)
-router.post("/category/:category", getProductsByCategory)
-router.post("/product-name/:productName", getProductsByName)
-router.post("/product-id/:id", getProductsById)
+router.get("/category/:category", getProductsByCategory)
+router.get("/search/:productName", getProductsByName)
+router.get("/:id", getProductsById)
 
 export default router
