@@ -1,6 +1,6 @@
 # Junior Shopping Site Backend
 
-A robust Node.js backend for an e-commerce platform built with Express.js, TypeScript, Prisma, and PostgreSQL. Features user authentication, product management, rate limiting, and comprehensive logging.
+A robust Node.js backend for an e-commerce platform built with Express.js, TypeScript, Prisma, and MongoDB. Features user authentication, product management, rate limiting, and comprehensive logging.
 
 ## Features
 
@@ -8,7 +8,7 @@ A robust Node.js backend for an e-commerce platform built with Express.js, TypeS
 - **Product Management**: Fetch products by various criteria (all, category, name, ID)
 - **Security**: Rate limiting, secure cookies, password hashing, token invalidation
 - **Monitoring**: Winston logging, health checks, error tracking
-- **Database**: Prisma ORM with PostgreSQL
+- **Database**: Prisma ORM with MongoDB (configurable to PostgreSQL)
 - **Validation**: Zod schemas for input validation
 
 ## Tech Stack
@@ -16,7 +16,7 @@ A robust Node.js backend for an e-commerce platform built with Express.js, TypeS
 - **Runtime**: Node.js
 - **Language**: TypeScript
 - **Framework**: Express.js
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: MongoDB with Prisma ORM (supports PostgreSQL)
 - **Authentication**: JWT with bcrypt hashing
 - **Validation**: Zod
 - **Logging**: Winston
@@ -40,7 +40,7 @@ A robust Node.js backend for an e-commerce platform built with Express.js, TypeS
    ```env
    NODE_ENV=development
    PORT=4000
-   DATABASE_URL="postgresql://username:password@localhost:5432/dbname"
+   DATABASE_URL="mongodb://username:password@localhost:27017/dbname"
    JWT_SECRET=your-super-secret-jwt-key
    ```
 
@@ -286,12 +286,37 @@ Input validation using Zod schemas:
 - All logs to `combined.log`
 - Console logging in development mode
 
-## Database Schema
+## Database Configuration
 
-Uses Prisma with PostgreSQL. Key models:
-- **User**: id, username, email, password
-- **Token**: id, userId, token
-- **Product**: Comprehensive product model with all e-commerce fields
+This project uses Prisma ORM and is currently configured for **MongoDB**. You can switch to PostgreSQL if needed.
+
+### MongoDB (Current Setup)
+- **Connection String**: `mongodb://username:password@localhost:27017/dbname`
+- **Features**: Document-based, flexible schema, good for rapid development
+- **Setup**: Ensure MongoDB is running locally or use MongoDB Atlas
+
+### PostgreSQL (Alternative)
+If you prefer PostgreSQL:
+1. Update `prisma/schema.prisma`:
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   ```
+2. Change the connection string in `.env`:
+   ```env
+   DATABASE_URL="postgresql://username:password@localhost:5432/dbname"
+   ```
+3. Update model annotations (remove `@db.ObjectId`, `@map("_id")`, etc.)
+4. Run `npx prisma generate && npx prisma db push`
+
+### Database Schema
+
+Uses Prisma with MongoDB. Key models:
+- **User**: id, username, email, password, tokens
+- **Token**: id, userId, token, createdAt
+- **Product**: Comprehensive product model with e-commerce fields
 
 ## Deployment
 
@@ -305,7 +330,7 @@ docker run -p 4000:4000 juniorshoppingsite-backend
 ```env
 NODE_ENV=production
 PORT=4000
-DATABASE_URL=your-prod-db-url
+DATABASE_URL=your-mongodb-atlas-url-or-prod-mongo-url
 JWT_SECRET=your-secure-jwt-secret
 ```
 
